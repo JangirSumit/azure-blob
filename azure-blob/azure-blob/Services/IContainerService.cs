@@ -1,8 +1,11 @@
 ﻿using Azure.Storage.Blobs;
+using azure_blob.DTOs;
 
 namespace azure_blob.Services;
 
 public interface IContainerService
 {
-    Task<BlobContainerClient?> CreateContainerAsync(string name);
+    void Init(BlobServiceClient blobServiceClient);
+    Task<CreateContainerResponseDto?> CreateContainerAsync(string name);
+    Task DeleteContainerAsync(string name);
 }

@@ -1,23 +1,18 @@
 ﻿using Azure.Storage.Blobs;
 using Azure;
+using azure_blob.DTOs;
 
 namespace azure_blob.Services;
 
-public class ContainerService : IContainerService
+public class ContainerService() : IContainerService
 {
-    private readonly BlobServiceClient? _blobServiceClient;
+    private BlobServiceClient? _blobServiceClient;
 
-    public ContainerService(BlobServiceClient? blobServiceClient)
-    {
-        _blobServiceClient = blobServiceClient ?? throw new Exception("BlobServiceClient can not be null...");
-    }
-
-    public async Task<BlobContainerClient?> CreateContainerAsync(string name)
+    public async Task<CreateContainerResponseDto?> CreateContainerAsync(string name)
     {
         // Name the sample container based on new GUID to ensure uniqueness.
         // The container name must be lowercase.
         string containerName = "container-" + name.Replace(" ", "");
-
         try
         {
             // Create the container
@@ -26,16 +21,33 @@ public class ContainerService : IContainerService
             if (await container.ExistsAsync())
             {
                 Console.WriteLine("Created container {0}", container.Name);
-                return container;
+                return new CreateContainerResponseDto(true, container.Name);
             }
         }
-        catch (RequestFailedException e)
+        catch (RequestFailedException)
         {
-            Console.WriteLine("HTTP error code {0}: {1}",
-                                e.Status, e.ErrorCode);
-            Console.WriteLine(e.Message);
+            throw;
         }
 
-        return null;
+        return new CreateContainerResponseDto(false, "");
+    }
+
+    public async Task DeleteContainerAsync(string containerName)
+    {
+        BlobContainerClient container = _blobServiceClient.GetBlobContainerClient(containerName);
+
+        try
+        {
+            await container.DeleteAsync();
+        }
+        catch (RequestFailedException)
+        {
+            throw;
+        }
+    }
+
+    public void Init(BlobServiceClient? blobServiceClient)
+    {
+        _blobServiceClient = blobServiceClient ?? throw new NotImplementedException();
     }
 }
