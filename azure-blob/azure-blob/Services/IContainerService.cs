@@ -8,4 +8,5 @@ public interface IContainerService
     void Init(BlobServiceClient blobServiceClient);
     Task<CreateContainerResponseDto?> CreateContainerAsync(string name);
     Task DeleteContainerAsync(string name);
+    Task<List<string>> GetContainers(string prefix);
 }
